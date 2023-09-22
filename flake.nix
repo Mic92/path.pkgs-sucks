@@ -10,15 +10,16 @@
     flake-parts.lib.mkFlake { inherit inputs; } ({ lib, ... }: {
       systems = lib.systems.flakeExposed;
       perSystem = { self', pkgs, ... }: {
+        apps.default = self'.apps.benchmark;
         apps.benchmark.program = builtins.toString (pkgs.writeShellScript "benchmark" ''
           cd ${self}
-          echo fast
+          echo hello without pkgs.path
           time nix eval '.#hello-fast' --apply builtins.toString --no-eval-cache
-          echo slow
+          echo hello with pkgs.path
           time nix eval '.#hello-slow' --apply builtins.toString --no-eval-cache
         '');
         packages.hello-fast = pkgs.hello.overrideAttrs (old: {
-          path = pkgs.writeText "hello-slow.sh" "";
+          path = pkgs.writeText "not-path" "";
         });
         packages.hello-slow = pkgs.hello.overrideAttrs (old: {
           path = pkgs.path;
